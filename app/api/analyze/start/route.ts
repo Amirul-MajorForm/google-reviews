@@ -44,12 +44,16 @@ export async function POST(req: NextRequest) {
     const s = runs.get(runId)!
     try {
       const searchQuery = location ? `${query} ${location}` : query
-      const apifyRunId = await startApifyRun('web_wanderer~google-reviews-scraper', {
-        searchQuery,
+      // web_wanderer/google-reviews-scraper expects startUrls with Google Maps search URLs
+      const mapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(searchQuery)}`
+      const actorInput = {
+        startUrls: [{ url: mapsUrl }],
         maxReviews: maxReviews || 100,
         language: 'en',
         sort: 'newest',
-      })
+      }
+      console.log('[apify] input:', JSON.stringify(actorInput))
+      const apifyRunId = await startApifyRun('web_wanderer~google-reviews-scraper', actorInput)
       s.apifyRunId = apifyRunId
       s.status = { phase: 'scraping', progress: 15 }
 
