@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
       const actorInput = {
         search: [query],
         search_location: location || 'Singapore',
-        search_limit: 5,
+        search_limit: 20,
         limit: maxReviews || 100,
         lang: 'en',
         order: 'newest',
