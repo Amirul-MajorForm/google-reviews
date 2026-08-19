@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     const s = runs.get(runId)!
     try {
       const searchQuery = location ? `${query} ${location}` : query
-      const apifyRunId = await startApifyRun('web_wanderer/google-reviews-scraper', {
+      const apifyRunId = await startApifyRun('web_wanderer~google-reviews-scraper', {
         searchQuery,
         maxReviews: maxReviews || 100,
         language: 'en',
