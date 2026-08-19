@@ -65,10 +65,11 @@ export async function POST(req: NextRequest) {
 
       const { analyzeReviews, buildAnalysisResult } = await import('@/lib/claude')
 
-      // Log first item to help debug field names in Railway logs
+      // Log first item fully so we can see exact field names
       if (items.length > 0) {
-        console.log('[apify] first item keys:', Object.keys(items[0] as object))
-        console.log('[apify] first item sample:', JSON.stringify(items[0]).substring(0, 500))
+        const first = items[0] as Record<string, unknown>
+        console.log('[apify] first item keys:', Object.keys(first))
+        console.log('[apify] first item full:', JSON.stringify(first).substring(0, 1000))
       } else {
         console.log('[apify] WARNING: dataset returned 0 items')
       }
@@ -128,7 +129,10 @@ export async function POST(req: NextRequest) {
       }).filter(r => r.rating > 0 && r.text.trim().length > 10)
 
       console.log(`[apify] mapped ${rawReviews.length} valid reviews from ${items.length} raw items`)
-      if (rawReviews.length === 0) throw new Error(`Apify returned ${items.length} items but none had valid rating+text. Check Railway logs for field names.`)
+      if (rawReviews.length === 0) {
+        const sample = JSON.stringify(items[0]).substring(0, 300)
+        throw new Error(`Apify returned ${items.length} items but none had valid rating+text. First item: ${sample}`)
+      }
 
       const insights = await analyzeReviews(query, rawReviews)
       const result = buildAnalysisResult(query, location || undefined, rawReviews, insights)
