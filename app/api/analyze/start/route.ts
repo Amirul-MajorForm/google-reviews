@@ -78,8 +78,8 @@ export async function POST(req: NextRequest) {
         // web_wanderer/google-reviews-scraper output schema
         const reviewer = item.reviewer as Record<string, unknown> | undefined
         const author = String(
-          reviewer?.name ??
           item.reviewer_name ??
+          reviewer?.name ??
           item.reviewerName ??
           item.author ??
           item.authorName ??
@@ -97,16 +97,16 @@ export async function POST(req: NextRequest) {
         )
 
         const date = String(
+          item.reviewed_at_date ??
           item.date ??
           item.published_at ??
           item.publishedAtDate ??
-          item.publishAt ??
           item.reviewDate ??
-          item.review_date ??
           ''
         ).substring(0, 10)
 
         const text = String(
+          item.content ??        // actual field name from this actor
           item.text ??
           item.review_text ??
           item.reviewText ??
@@ -121,7 +121,6 @@ export async function POST(req: NextRequest) {
           item.placeTitle ??
           item.title ??
           item.businessName ??
-          item.location_name ??
           ''
         ) || undefined
 
