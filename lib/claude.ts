@@ -28,7 +28,7 @@ export async function analyzeReviews(
 ): Promise<ClaudeInsights> {
   const reviewsForAnalysis = rawReviews
     .filter(r => r.text && r.text.trim().length > 20)
-    .slice(0, 200)
+    .slice(0, 60)
 
   const reviewsText = reviewsForAnalysis
     .map((r, i) => `[${i + 1}] ★${r.rating} | ${r.date || 'Unknown'} | ${r.place || 'Unknown place'}\n"${r.text.substring(0, 600)}"`)
@@ -108,7 +108,7 @@ export function buildAnalysisResult(
   rawReviews: RawReview[],
   insights: ClaudeInsights
 ): AnalysisResult {
-  const validReviews = rawReviews.filter(r => r.text && r.text.trim().length > 20).slice(0, 200)
+  const validReviews = rawReviews.filter(r => r.text && r.text.trim().length > 20).slice(0, 60)
 
   const ratingCounts = [0, 0, 0, 0, 0]
   for (const r of validReviews) {
