@@ -85,10 +85,20 @@ Rules:
 
   if (!res.ok) throw new Error(`Claude API failed: ${res.status} ${await res.text()}`)
   const data = await res.json()
-  const content = data.content[0].text
+
+  if (!data.content || !Array.isArray(data.content)) {
+    throw new Error(`Unexpected Claude response shape: ${JSON.stringify(data).substring(0, 300)}`)
+  }
+
+  // Sonnet 5 uses adaptive thinking — content[0] may be a thinking block, not text
+  const textBlock = data.content.find((b: { type: string }) => b.type === 'text')
+  if (!textBlock || !textBlock.text) {
+    throw new Error(`No text block in Claude response. Blocks: ${data.content.map((b: { type: string }) => b.type).join(', ')}`)
+  }
+  const content: string = textBlock.text
 
   const jsonMatch = content.match(/\{[\s\S]*\}/)
-  if (!jsonMatch) throw new Error('Claude response did not contain valid JSON')
+  if (!jsonMatch) throw new Error(`Claude response did not contain valid JSON. Preview: ${content.substring(0, 200)}`)
   return JSON.parse(jsonMatch[0]) as ClaudeInsights
 }
 
