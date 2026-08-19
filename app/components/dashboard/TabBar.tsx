@@ -3,7 +3,6 @@
 const TABS = [
   { key: 'overview', label: 'Overview' },
   { key: 'themes', label: 'Themes' },
-  { key: 'reviews', label: 'Reviews' },
   { key: 'pitch', label: 'Pitch Angles' },
 ]
 

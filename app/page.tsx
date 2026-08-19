@@ -8,7 +8,6 @@ import DashboardHeader from './components/dashboard/Header'
 import TabBar from './components/dashboard/TabBar'
 import OverviewTab from './components/dashboard/tabs/OverviewTab'
 import ThemesTab from './components/dashboard/tabs/ThemesTab'
-import ReviewsTab from './components/dashboard/tabs/ReviewsTab'
 import PitchTab from './components/dashboard/tabs/PitchTab'
 import { AnalysisResult, RunPhase } from '@/types/analysis'
 
@@ -22,13 +21,13 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState('overview')
   const [submitting, setSubmitting] = useState(false)
 
-  const handleSubmit = async (data: { query: string; location: string; maxReviews: number }) => {
+  const handleSubmit = async (data: { query: string; location: string; context: string }) => {
     setSubmitting(true)
     try {
       const res = await fetch('/api/analyze/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ query: data.query, location: data.location, context: data.context }),
       })
       const { runId } = await res.json()
       setAppState('loading')
@@ -91,7 +90,6 @@ export default function Home() {
           <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 24px' }}>
             {activeTab === 'overview' && <OverviewTab result={result} />}
             {activeTab === 'themes' && <ThemesTab result={result} />}
-            {activeTab === 'reviews' && <ReviewsTab result={result} />}
             {activeTab === 'pitch' && <PitchTab result={result} />}
           </div>
         </div>

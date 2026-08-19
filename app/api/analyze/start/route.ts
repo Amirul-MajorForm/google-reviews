@@ -11,7 +11,7 @@ export function getRunsStore() {
 }
 
 export async function POST(req: NextRequest) {
-  const { query, location, maxReviews } = await req.json()
+  const { query, location, context } = await req.json()
 
   if (!query) return NextResponse.json({ error: 'Missing query' }, { status: 400 })
 
@@ -47,7 +47,8 @@ export async function POST(req: NextRequest) {
         search: [query],
         search_location: location || 'Singapore',
         search_limit: 20,
-        limit: maxReviews || 100,
+        limit: 10,               // 10 reviews per place × 20 places = up to 200 varied reviews
+        searchKeyword: query,    // only return reviews that mention the search term
         lang: 'en',
         order: 'newest',
         source: 'google',
@@ -133,7 +134,7 @@ export async function POST(req: NextRequest) {
         throw new Error(`Apify returned ${items.length} items but none had valid rating+text. First item: ${sample}`)
       }
 
-      const insights = await analyzeReviews(query, rawReviews)
+      const insights = await analyzeReviews(query, rawReviews, context || '')
       const result = buildAnalysisResult(query, location || undefined, rawReviews, insights)
 
       s.status = { phase: 'complete', progress: 100 }

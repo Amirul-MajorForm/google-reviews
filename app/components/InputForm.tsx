@@ -3,18 +3,18 @@
 import { useState } from 'react'
 
 interface InputFormProps {
-  onSubmit: (data: { query: string; location: string; maxReviews: number }) => void
+  onSubmit: (data: { query: string; location: string; context: string }) => void
   loading?: boolean
 }
 
 export default function InputForm({ onSubmit, loading }: InputFormProps) {
   const [query, setQuery] = useState('')
   const [location, setLocation] = useState('Singapore')
-  const [maxReviews, setMaxReviews] = useState(100)
+  const [context, setContext] = useState('')
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit({ query: query.trim(), location: location.trim(), maxReviews })
+    onSubmit({ query: query.trim(), location: location.trim(), context: context.trim() })
   }
 
   return (
@@ -29,20 +29,20 @@ export default function InputForm({ onSubmit, loading }: InputFormProps) {
           lineHeight: 1.2,
           marginBottom: 12,
         }}>
-          Analyse what patients are saying
+          Understand what people are saying
         </h1>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6 }}>
-          Scrape Google reviews for any treatment or brand and extract pitch-ready insights — sentiment, themes, pros, cons, and angles for your response.
+          Scrape Google reviews for any business, brand, or service and extract actionable insights — sentiment, themes, pros, cons, and angles to inform your strategy.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <div>
-          <label className="section-label" style={{ display: 'block', marginBottom: 8 }}>Treatment or Brand *</label>
+          <label className="section-label" style={{ display: 'block', marginBottom: 8 }}>What to search *</label>
           <input
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder="e.g. Ultherapy, HIFU, CoolSculpting, filler"
+            placeholder="e.g. Ultherapy, CrossFit, Kumon, SoulCycle"
             required
           />
         </div>
@@ -60,12 +60,17 @@ export default function InputForm({ onSubmit, loading }: InputFormProps) {
         </div>
 
         <div>
-          <label className="section-label" style={{ display: 'block', marginBottom: 8 }}>Number of Reviews</label>
-          <select value={maxReviews} onChange={e => setMaxReviews(Number(e.target.value))}>
-            <option value={50}>50 reviews (faster)</option>
-            <option value={100}>100 reviews (recommended)</option>
-            <option value={200}>200 reviews (comprehensive)</option>
-          </select>
+          <label className="section-label" style={{ display: 'block', marginBottom: 8 }}>What do you want to know? (optional)</label>
+          <textarea
+            value={context}
+            onChange={e => setContext(e.target.value)}
+            placeholder="e.g. I'm pitching this treatment to potential investors. Focus on patient satisfaction, pain levels, and value for money."
+            rows={3}
+            style={{ resize: 'vertical' }}
+          />
+          <p style={{ marginTop: 6, fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+            Give the AI context on your goal so it surfaces more relevant insights.
+          </p>
         </div>
 
         <button
@@ -89,7 +94,7 @@ export default function InputForm({ onSubmit, loading }: InputFormProps) {
         </button>
 
         <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textAlign: 'center' }}>
-          Scraping takes 2–5 min · AI analysis adds ~30 seconds
+          Scraping takes 1–2 min · AI analysis adds ~30 seconds
         </p>
       </form>
     </div>

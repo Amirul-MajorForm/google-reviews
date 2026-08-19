@@ -24,7 +24,8 @@ interface ClaudeInsights {
 
 export async function analyzeReviews(
   query: string,
-  rawReviews: RawReview[]
+  rawReviews: RawReview[],
+  context = ''
 ): Promise<ClaudeInsights> {
   const reviewsForAnalysis = rawReviews
     .filter(r => r.text && r.text.trim().length > 20)
@@ -34,9 +35,14 @@ export async function analyzeReviews(
     .map((r, i) => `[${i + 1}] ★${r.rating} | ${r.date || 'Unknown'} | ${r.place || 'Unknown place'}\n"${r.text.substring(0, 600)}"`)
     .join('\n\n')
 
-  const prompt = `You are analyzing Google reviews for "${query}" — an ultrasound-based skin tightening treatment used in aesthetics clinics.
+  const contextSection = context
+    ? `\nANALYSIS GOAL (from user): ${context}\nUse this to shape the pitch angles and emphasis of your insights.\n`
+    : ''
 
-These ${reviewsForAnalysis.length} reviews come from real patients across multiple clinics and providers.
+  const prompt = `You are analyzing Google reviews for "${query}".
+
+These ${reviewsForAnalysis.length} reviews come from real customers across multiple locations and providers.
+${contextSection}
 
 REVIEWS:
 ${reviewsText}
@@ -62,8 +68,8 @@ Extract pitch-ready insights. Return ONLY valid JSON with no markdown, exactly m
 }
 
 Rules:
-- pitchAngles: 4-5 angles useful when pitching Ultherapy to potential patients or investors
-- keyThemes: 6-8 themes (e.g. pain level, treatment results, downtime, cost-value, provider skill, expectation-setting)
+- pitchAngles: 4-5 angles useful when pitching or positioning "${query}" — tailor to the analysis goal if one was provided
+- keyThemes: 6-8 themes relevant to this category (e.g. quality, value, staff, experience, results, wait time)
 - notableQuotes: 6-8 impactful quotes mixing positive and honest/balanced ones
 - reviewSentiments and reviewThemes must have exactly ${reviewsForAnalysis.length} entries (one per review)
 - sentiment percentages must sum to 100
