@@ -31,13 +31,41 @@ export async function getApifyDataset(datasetId: string): Promise<unknown[]> {
   return res.json()
 }
 
+async function abortApifyRun(runId: string): Promise<void> {
+  await fetch(`https://api.apify.com/v2/actor-runs/${runId}/abort`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${APIFY_TOKEN}` },
+  })
+}
+
 export async function pollApifyRun(runId: string, timeoutMs: number): Promise<unknown[]> {
   const start = Date.now()
+  let lastDatasetId: string | null = null
+
   while (Date.now() - start < timeoutMs) {
     const run = await getApifyRun(runId)
+    lastDatasetId = run.defaultDatasetId
+
     if (run.status === 'SUCCEEDED') return getApifyDataset(run.defaultDatasetId)
-    if (run.status === 'FAILED' || run.status === 'ABORTED') throw new Error(`Run ${runId} ${run.status}`)
+    if (run.status === 'FAILED' || run.status === 'ABORTED') {
+      // On abort we triggered, fetch partial data instead of throwing
+      if (lastDatasetId) {
+        const items = await getApifyDataset(lastDatasetId)
+        if (items.length > 0) return items
+      }
+      throw new Error(`Run ${runId} ${run.status}`)
+    }
     await new Promise(r => setTimeout(r, 5000))
   }
-  throw new Error('Apify run timed out')
+
+  // Timeout reached — abort the run and return whatever data was collected
+  console.log(`[apify] timeout reached after ${timeoutMs}ms, aborting run and fetching partial data`)
+  await abortApifyRun(runId)
+  await new Promise(r => setTimeout(r, 3000)) // brief wait for abort to register
+  if (lastDatasetId) {
+    const items = await getApifyDataset(lastDatasetId)
+    console.log(`[apify] partial dataset has ${items.length} items`)
+    return items
+  }
+  throw new Error('Apify run timed out and no dataset available')
 }

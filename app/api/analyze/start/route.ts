@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
       s.status = { phase: 'scraping', progress: 15 }
 
       const { pollApifyRun } = await import('@/lib/apify')
-      const items = await pollApifyRun(apifyRunId, 300000)
+      const items = await pollApifyRun(apifyRunId, 180000)
 
       s.status = { phase: 'analyzing', progress: 65 }
 
