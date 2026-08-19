@@ -60,29 +60,65 @@ export async function POST(req: NextRequest) {
 
       const { analyzeReviews, buildAnalysisResult } = await import('@/lib/claude')
 
-      const rawReviews = (items as Record<string, unknown>[]).map(item => ({
-        author: String(
-          (item.reviewer as Record<string, unknown>)?.name ??
-          item.name ??
+      // Log first item to help debug field names in Railway logs
+      if (items.length > 0) {
+        console.log('[apify] first item keys:', Object.keys(items[0] as object))
+        console.log('[apify] first item sample:', JSON.stringify(items[0]).substring(0, 500))
+      } else {
+        console.log('[apify] WARNING: dataset returned 0 items')
+      }
+
+      const rawReviews = (items as Record<string, unknown>[]).map(item => {
+        // Try every known field name variant from this actor
+        const reviewer = item.reviewer as Record<string, unknown> | undefined
+        const author = String(
+          reviewer?.name ??
+          item.reviewerName ??
           item.authorName ??
+          item.name ??
           'Anonymous'
-        ),
-        rating: Number(item.stars ?? item.rating ?? item.reviewRating ?? 0),
-        date: String(
+        )
+
+        const rating = Number(
+          item.stars ??
+          item.rating ??
+          item.reviewRating ??
+          item.ratingValue ??
+          0
+        )
+
+        const date = String(
           item.publishedAtDate ??
           item.publishAt ??
-          item.date ??
           item.reviewDate ??
+          item.date ??
+          item.relativeDate ??
           ''
-        ).substring(0, 10),
-        text: String(item.text ?? item.reviewText ?? item.snippet ?? ''),
-        place: String(
+        ).substring(0, 10)
+
+        const text = String(
+          item.reviewText ??
+          item.text ??
+          item.snippet ??
+          item.reviewBody ??
+          item.body ??
+          ''
+        )
+
+        const place = String(
+          item.placeName ??
           item.placeTitle ??
           item.title ??
           item.businessName ??
+          item.locationName ??
           ''
-        ) || undefined,
-      })).filter(r => r.rating > 0 && r.text.trim().length > 10)
+        ) || undefined
+
+        return { author, rating, date, text, place }
+      }).filter(r => r.rating > 0 && r.text.trim().length > 10)
+
+      console.log(`[apify] mapped ${rawReviews.length} valid reviews from ${items.length} raw items`)
+      if (rawReviews.length === 0) throw new Error(`Apify returned ${items.length} items but none had valid rating+text. Check Railway logs for field names.`)
 
       const insights = await analyzeReviews(query, rawReviews)
       const result = buildAnalysisResult(query, location || undefined, rawReviews, insights)
