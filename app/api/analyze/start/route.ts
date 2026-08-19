@@ -43,14 +43,15 @@ export async function POST(req: NextRequest) {
   ;(async () => {
     const s = runs.get(runId)!
     try {
-      const searchQuery = location ? `${query} ${location}` : query
-      // web_wanderer/google-reviews-scraper expects startUrls with Google Maps search URLs
-      const mapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(searchQuery)}`
       const actorInput = {
-        startUrls: [{ url: mapsUrl }],
-        maxReviews: maxReviews || 100,
-        language: 'en',
-        sort: 'newest',
+        search: [query],
+        search_location: location || 'Singapore',
+        search_limit: 5,
+        limit: maxReviews || 100,
+        lang: 'en',
+        order: 'newest',
+        source: 'google',
+        include_personal: false,
       }
       console.log('[apify] input:', JSON.stringify(actorInput))
       const apifyRunId = await startApifyRun('web_wanderer~google-reviews-scraper', actorInput)
@@ -73,48 +74,53 @@ export async function POST(req: NextRequest) {
       }
 
       const rawReviews = (items as Record<string, unknown>[]).map(item => {
-        // Try every known field name variant from this actor
+        // web_wanderer/google-reviews-scraper output schema
         const reviewer = item.reviewer as Record<string, unknown> | undefined
         const author = String(
           reviewer?.name ??
+          item.reviewer_name ??
           item.reviewerName ??
+          item.author ??
           item.authorName ??
           item.name ??
           'Anonymous'
         )
 
         const rating = Number(
-          item.stars ??
           item.rating ??
+          item.stars ??
+          item.star_rating ??
           item.reviewRating ??
           item.ratingValue ??
           0
         )
 
         const date = String(
+          item.date ??
+          item.published_at ??
           item.publishedAtDate ??
           item.publishAt ??
           item.reviewDate ??
-          item.date ??
-          item.relativeDate ??
+          item.review_date ??
           ''
         ).substring(0, 10)
 
         const text = String(
-          item.reviewText ??
           item.text ??
+          item.review_text ??
+          item.reviewText ??
           item.snippet ??
-          item.reviewBody ??
           item.body ??
           ''
         )
 
         const place = String(
+          item.place_name ??
           item.placeName ??
           item.placeTitle ??
           item.title ??
           item.businessName ??
-          item.locationName ??
+          item.location_name ??
           ''
         ) || undefined
 
