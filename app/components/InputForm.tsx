@@ -8,8 +8,8 @@ interface InputFormProps {
 }
 
 export default function InputForm({ onSubmit, loading }: InputFormProps) {
-  const [query, setQuery] = useState('Ultherapy')
-  const [location, setLocation] = useState('')
+  const [query, setQuery] = useState('')
+  const [location, setLocation] = useState('Singapore')
   const [maxReviews, setMaxReviews] = useState(100)
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -42,7 +42,7 @@ export default function InputForm({ onSubmit, loading }: InputFormProps) {
           <input
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder="e.g. Ultherapy, HIFU, CoolSculpting"
+            placeholder="e.g. Ultherapy, HIFU, CoolSculpting, filler"
             required
           />
         </div>
@@ -55,7 +55,7 @@ export default function InputForm({ onSubmit, loading }: InputFormProps) {
             placeholder="e.g. Singapore, Sydney, United States"
           />
           <p style={{ marginTop: 6, fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-            Leave blank to scrape reviews globally.
+            Defaults to Singapore. Change to target a different market.
           </p>
         </div>
 
