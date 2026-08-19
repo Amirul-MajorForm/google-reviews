@@ -23,8 +23,8 @@ export async function getApifyRun(runId: string) {
   return data.data
 }
 
-export async function getApifyDataset(datasetId: string): Promise<unknown[]> {
-  const res = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items`, {
+export async function getApifyDataset(datasetId: string, limit = 500): Promise<unknown[]> {
+  const res = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?limit=${limit}`, {
     headers: { Authorization: `Bearer ${APIFY_TOKEN}` },
   })
   if (!res.ok) throw new Error(`Apify dataset failed: ${res.status}`)
