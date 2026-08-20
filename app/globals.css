@@ -127,10 +127,12 @@ tbody td { padding: 10px 12px; font-size: 0.875rem; color: var(--text-primary); 
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
   body { overflow: visible !important; }
-  body > * { display: none !important; }
-  aside { display: none !important; }
-  nav { display: none !important; }
-  .print-report { display: block !important; font-family: 'DM Sans', sans-serif; color: #111; padding: 32px; }
+
+  /* visibility approach: hide everything, then reveal only the print report.
+     A child can override visibility:hidden unlike display:none. */
+  body > * { visibility: hidden; }
+  .print-report { visibility: visible; display: block !important; position: absolute; top: 0; left: 0; width: 100%; font-family: 'DM Sans', sans-serif; color: #111; padding: 32px; }
+  .print-report * { visibility: visible; }
 
   .pr-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #111; }
   .pr-title { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; margin: 4px 0; }
