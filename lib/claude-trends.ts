@@ -81,47 +81,11 @@ export function buildTrendsResult(
   keywords: string[],
   location: string,
   timePeriod: string,
-  rawItems: Record<string, unknown>[],
+  interestOverTime: TrendPoint[],
+  relatedQueries: RelatedQuery[],
+  relatedTopics: RelatedTopic[],
   insights: TrendInsight
 ): TrendsAnalysisResult {
-  // The actor returns mixed item types — discriminate by presence of fields
-  const interestOverTime: TrendPoint[] = []
-  const relatedQueries: RelatedQuery[] = []
-  const relatedTopics: RelatedTopic[] = []
-
-  for (const item of rawItems) {
-    if (item.date !== undefined && item.value !== undefined) {
-      // Interest over time item
-      interestOverTime.push({
-        date: String(item.date ?? ''),
-        value: Number(item.value ?? 0),
-        keyword: String(item.keyword ?? item.searchTerm ?? keywords[0] ?? ''),
-      })
-    } else if (item.query !== undefined) {
-      // Related query item
-      relatedQueries.push({
-        query: String(item.query ?? ''),
-        value: Number(item.value ?? 0),
-        formattedValue: String(item.formattedValue ?? item.value ?? ''),
-        isRising: Boolean(item.isRising ?? item.rising ?? item.type === 'rising'),
-        keyword: String(item.keyword ?? item.searchTerm ?? keywords[0] ?? ''),
-      })
-    } else if (item.topic !== undefined || item.topicTitle !== undefined) {
-      // Related topic item
-      relatedTopics.push({
-        topic: String(item.topic ?? item.topicMid ?? ''),
-        topicTitle: String(item.topicTitle ?? item.topic ?? ''),
-        value: Number(item.value ?? 0),
-        formattedValue: String(item.formattedValue ?? item.value ?? ''),
-        isRising: Boolean(item.isRising ?? item.rising ?? item.type === 'rising'),
-        keyword: String(item.keyword ?? item.searchTerm ?? keywords[0] ?? ''),
-      })
-    }
-  }
-
-  // Sort interest over time by date
-  interestOverTime.sort((a, b) => a.date.localeCompare(b.date))
-
   return {
     keywords,
     location,

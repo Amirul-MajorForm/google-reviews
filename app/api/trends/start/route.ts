@@ -57,39 +57,66 @@ export async function POST(req: NextRequest) {
 
       const rawItems = items as Record<string, unknown>[]
 
-      // Separate interest-over-time from related queries/topics
-      const interestItems = rawItems.filter(i => i.date !== undefined && i.value !== undefined)
-      const relatedQueryItems = rawItems.filter(i => i.query !== undefined)
-      const relatedTopicItems = rawItems.filter(i => i.topic !== undefined || i.topicTitle !== undefined)
+      // Actor returns one item per keyword with nested arrays
+      // Fields: interestOverTime_timelineData, relatedQueries_top, relatedQueries_rising,
+      //         relatedTopics_top, relatedTopics_rising
+      const timePoints: import('@/types/trends').TrendPoint[] = []
+      const queries: import('@/types/trends').RelatedQuery[] = []
+      const topics: import('@/types/trends').RelatedTopic[] = []
 
-      console.log(`[trends-apify] ${interestItems.length} time-series, ${relatedQueryItems.length} queries, ${relatedTopicItems.length} topics`)
+      for (const item of rawItems) {
+        const kw = String((item.searchTerm ?? item.inputUrlOrTerm ?? keywords[0]) as string)
+
+        // Interest over time
+        const timeline = item.interestOverTime_timelineData as Record<string, unknown>[] | undefined
+        if (Array.isArray(timeline)) {
+          for (const pt of timeline) {
+            const valArr = pt.value as number[]
+            timePoints.push({
+              date: String(pt.formattedAxisTime ?? pt.time ?? ''),
+              value: Array.isArray(valArr) ? (valArr[0] ?? 0) : Number(pt.value ?? 0),
+              keyword: kw,
+            })
+          }
+        }
+
+        // Related queries
+        const topQ = item.relatedQueries_top as Record<string, unknown>[] | undefined
+        if (Array.isArray(topQ)) {
+          for (const q of topQ) {
+            queries.push({ query: String(q.query ?? ''), value: Number(q.value ?? 0), formattedValue: String(q.formattedValue ?? q.value ?? ''), isRising: false, keyword: kw })
+          }
+        }
+        const risingQ = item.relatedQueries_rising as Record<string, unknown>[] | undefined
+        if (Array.isArray(risingQ)) {
+          for (const q of risingQ) {
+            queries.push({ query: String(q.query ?? ''), value: Number(q.value ?? 0), formattedValue: String(q.formattedValue ?? q.value ?? ''), isRising: true, keyword: kw })
+          }
+        }
+
+        // Related topics
+        const topT = item.relatedTopics_top as Record<string, unknown>[] | undefined
+        if (Array.isArray(topT)) {
+          for (const t of topT) {
+            const topicObj = t.topic as Record<string, unknown> | undefined
+            topics.push({ topic: String(topicObj?.mid ?? ''), topicTitle: String(topicObj?.title ?? ''), value: Number(t.value ?? 0), formattedValue: String(t.formattedValue ?? t.value ?? ''), isRising: false, keyword: kw })
+          }
+        }
+        const risingT = item.relatedTopics_rising as Record<string, unknown>[] | undefined
+        if (Array.isArray(risingT)) {
+          for (const t of risingT) {
+            const topicObj = t.topic as Record<string, unknown> | undefined
+            topics.push({ topic: String(topicObj?.mid ?? ''), topicTitle: String(topicObj?.title ?? ''), value: Number(t.value ?? 0), formattedValue: String(t.formattedValue ?? t.value ?? ''), isRising: true, keyword: kw })
+          }
+        }
+      }
+
+      console.log(`[trends-apify] ${timePoints.length} time-series, ${queries.length} queries, ${topics.length} topics`)
 
       const { analyzeTrends, buildTrendsResult } = await import('@/lib/claude-trends')
 
-      // Build partial objects for Claude analysis
-      const timePoints = interestItems.map(i => ({
-        date: String(i.date ?? ''),
-        value: Number(i.value ?? 0),
-        keyword: String(i.keyword ?? i.searchTerm ?? keywords[0]),
-      }))
-      const queries = relatedQueryItems.map(i => ({
-        query: String(i.query ?? ''),
-        value: Number(i.value ?? 0),
-        formattedValue: String(i.formattedValue ?? i.value ?? ''),
-        isRising: Boolean(i.isRising ?? i.rising ?? i.type === 'rising'),
-        keyword: String(i.keyword ?? i.searchTerm ?? keywords[0]),
-      }))
-      const topics = relatedTopicItems.map(i => ({
-        topic: String(i.topic ?? i.topicMid ?? ''),
-        topicTitle: String(i.topicTitle ?? i.topic ?? ''),
-        value: Number(i.value ?? 0),
-        formattedValue: String(i.formattedValue ?? i.value ?? ''),
-        isRising: Boolean(i.isRising ?? i.rising ?? i.type === 'rising'),
-        keyword: String(i.keyword ?? i.searchTerm ?? keywords[0]),
-      }))
-
       const insights = await analyzeTrends(keywords, timePoints, queries, topics, context || '')
-      const result = buildTrendsResult(keywords, locationStr, timePeriod || '12months', rawItems, insights)
+      const result = buildTrendsResult(keywords, locationStr, timePeriod || '12months', timePoints, queries, topics, insights)
 
       s.status = { phase: 'complete', progress: 100 }
       s.result = result
