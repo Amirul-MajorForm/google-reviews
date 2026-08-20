@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 
 interface SidebarProps {
   activeTool: 'reviews' | 'search'
@@ -13,6 +14,7 @@ const TOOLS = [
     key: 'reviews',
     label: 'Review Scraper',
     description: 'Google Maps reviews',
+    href: '/',
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -23,13 +25,13 @@ const TOOLS = [
     key: 'search',
     label: 'Search Scraper',
     description: 'Google Search results',
+    href: '/search',
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="11" cy="11" r="8"/>
         <path d="m21 21-4.35-4.35"/>
       </svg>
     ),
-    comingSoon: true,
   },
 ]
 
@@ -113,8 +115,9 @@ export default function Sidebar({ activeTool, onNewAnalysis, showNew }: SidebarP
           {TOOLS.map(tool => {
             const isActive = activeTool === tool.key
             return (
-              <div
+              <Link
                 key={tool.key}
+                href={tool.href}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -123,10 +126,10 @@ export default function Sidebar({ activeTool, onNewAnalysis, showNew }: SidebarP
                   borderRadius: 7,
                   marginBottom: 2,
                   background: isActive ? 'var(--accent)' : 'transparent',
-                  color: isActive ? '#0A0A0A' : tool.comingSoon ? 'var(--text-muted)' : 'var(--text-primary)',
-                  cursor: tool.comingSoon ? 'default' : 'pointer',
-                  opacity: tool.comingSoon ? 0.5 : 1,
+                  color: isActive ? '#0A0A0A' : 'var(--text-primary)',
+                  cursor: 'pointer',
                   transition: 'background 0.15s',
+                  textDecoration: 'none',
                 }}
               >
                 <span style={{ flexShrink: 0 }}>{tool.icon}</span>
@@ -149,22 +152,7 @@ export default function Sidebar({ activeTool, onNewAnalysis, showNew }: SidebarP
                     {tool.description}
                   </div>
                 </div>
-                {tool.comingSoon && (
-                  <span style={{
-                    fontSize: '0.55rem',
-                    fontFamily: 'Space Grotesk',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.06em',
-                    background: 'var(--surface-raised)',
-                    color: 'var(--text-muted)',
-                    borderRadius: 4,
-                    padding: '2px 5px',
-                    flexShrink: 0,
-                  }}>
-                    Soon
-                  </span>
-                )}
-              </div>
+              </Link>
             )
           })}
         </div>
