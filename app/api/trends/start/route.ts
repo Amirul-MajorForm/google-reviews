@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
         searchTerms: keywords,
         geo: locationToGeoCode(locationStr),
         timePeriod: timePeriodToActorValue(timePeriod || '12months'),
-        category: '0',
+        category: '',
         gprop: '',
       }
       console.log('[trends-apify] input:', JSON.stringify(actorInput))
