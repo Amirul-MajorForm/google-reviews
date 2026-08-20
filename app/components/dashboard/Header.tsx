@@ -1,3 +1,5 @@
+'use client'
+
 import { AnalysisResult } from '@/types/analysis'
 
 function Stars({ rating }: { rating: number }) {
@@ -8,7 +10,13 @@ function Stars({ rating }: { rating: number }) {
   )
 }
 
-export default function DashboardHeader({ result }: { result: AnalysisResult }) {
+export default function DashboardHeader({
+  result,
+  onDownload,
+}: {
+  result: AnalysisResult
+  onDownload: () => void
+}) {
   return (
     <div style={{
       background: 'var(--surface)',
@@ -32,26 +40,49 @@ export default function DashboardHeader({ result }: { result: AnalysisResult }) 
             </p>
           </div>
 
-          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontFamily: 'Space Grotesk', fontWeight: 700, fontSize: '2rem', color: 'var(--accent)' }}>
-                {result.averageRating}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontFamily: 'Space Grotesk', fontWeight: 700, fontSize: '2rem', color: 'var(--accent)' }}>
+                  {result.averageRating}
+                </div>
+                <Stars rating={result.averageRating} />
+                <div className="section-label" style={{ marginTop: 4 }}>Avg Rating</div>
               </div>
-              <Stars rating={result.averageRating} />
-              <div className="section-label" style={{ marginTop: 4 }}>Avg Rating</div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontFamily: 'Space Grotesk', fontWeight: 700, fontSize: '2rem', color: 'var(--positive)' }}>
-                {result.sentiment.positive}%
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontFamily: 'Space Grotesk', fontWeight: 700, fontSize: '2rem', color: 'var(--positive)' }}>
+                  {result.sentiment.positive}%
+                </div>
+                <div className="section-label" style={{ marginTop: 4 }}>Positive</div>
               </div>
-              <div className="section-label" style={{ marginTop: 4 }}>Positive</div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontFamily: 'Space Grotesk', fontWeight: 700, fontSize: '2rem', color: 'var(--text-primary)' }}>
-                {result.totalReviews}
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontFamily: 'Space Grotesk', fontWeight: 700, fontSize: '2rem', color: 'var(--text-primary)' }}>
+                  {result.totalReviews}
+                </div>
+                <div className="section-label" style={{ marginTop: 4 }}>Reviews</div>
               </div>
-              <div className="section-label" style={{ marginTop: 4 }}>Reviews</div>
             </div>
+
+            <button
+              onClick={onDownload}
+              style={{
+                background: 'var(--surface-raised)',
+                color: 'var(--text-primary)',
+                border: '1px solid var(--border)',
+                borderRadius: 6,
+                padding: '10px 16px',
+                fontFamily: 'Space Grotesk',
+                fontWeight: 600,
+                fontSize: '0.85rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              ↓ Download PDF
+            </button>
           </div>
         </div>
       </div>

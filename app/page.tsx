@@ -9,6 +9,7 @@ import TabBar from './components/dashboard/TabBar'
 import OverviewTab from './components/dashboard/tabs/OverviewTab'
 import ThemesTab from './components/dashboard/tabs/ThemesTab'
 import PitchTab from './components/dashboard/tabs/PitchTab'
+import PrintReport from './components/PrintReport'
 import { AnalysisResult, RunPhase } from '@/types/analysis'
 
 type AppState = 'input' | 'loading' | 'dashboard'
@@ -85,7 +86,8 @@ export default function Home() {
 
       {appState === 'dashboard' && result && (
         <div>
-          <DashboardHeader result={result} />
+          <PrintReport result={result} />
+          <DashboardHeader result={result} onDownload={() => window.print()} />
           <TabBar active={activeTab} onChange={setActiveTab} />
           <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 24px' }}>
             {activeTab === 'overview' && <OverviewTab result={result} />}
