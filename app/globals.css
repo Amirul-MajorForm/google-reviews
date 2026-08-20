@@ -126,7 +126,10 @@ tbody td { padding: 10px 12px; font-size: 0.875rem; color: var(--text-primary); 
 @media print {
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
+  body { overflow: visible !important; }
   body > * { display: none !important; }
+  aside { display: none !important; }
+  nav { display: none !important; }
   .print-report { display: block !important; font-family: 'DM Sans', sans-serif; color: #111; padding: 32px; }
 
   .pr-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #111; }

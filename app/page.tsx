@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Nav from './components/Nav'
+import Sidebar from './components/Sidebar'
 import InputForm from './components/InputForm'
 import LoadingScreen from './components/LoadingScreen'
 import DashboardHeader from './components/dashboard/Header'
@@ -73,29 +73,35 @@ export default function Home() {
   }
 
   return (
-    <>
-      <Nav onNewAnalysis={handleReset} showNew={appState === 'dashboard'} />
+    <div style={{ display: 'flex', minHeight: '100vh' }}>
+      <Sidebar
+        activeTool="reviews"
+        onNewAnalysis={handleReset}
+        showNew={appState === 'dashboard'}
+      />
 
-      {appState === 'input' && (
-        <InputForm onSubmit={handleSubmit} loading={submitting} />
-      )}
+      <main style={{ flex: 1, minWidth: 0, overflow: 'auto' }}>
+        {appState === 'input' && (
+          <InputForm onSubmit={handleSubmit} loading={submitting} />
+        )}
 
-      {appState === 'loading' && (
-        <LoadingScreen phase={loadingPhase} progress={loadingProgress} />
-      )}
+        {appState === 'loading' && (
+          <LoadingScreen phase={loadingPhase} progress={loadingProgress} />
+        )}
 
-      {appState === 'dashboard' && result && (
-        <div>
-          <PrintReport result={result} />
-          <DashboardHeader result={result} onDownload={() => window.print()} />
-          <TabBar active={activeTab} onChange={setActiveTab} />
-          <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 24px' }}>
-            {activeTab === 'overview' && <OverviewTab result={result} />}
-            {activeTab === 'themes' && <ThemesTab result={result} />}
-            {activeTab === 'pitch' && <PitchTab result={result} />}
-          </div>
-        </div>
-      )}
-    </>
+        {appState === 'dashboard' && result && (
+          <>
+            <PrintReport result={result} />
+            <DashboardHeader result={result} onDownload={() => window.print()} />
+            <TabBar active={activeTab} onChange={setActiveTab} />
+            <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 24px' }}>
+              {activeTab === 'overview' && <OverviewTab result={result} />}
+              {activeTab === 'themes' && <ThemesTab result={result} />}
+              {activeTab === 'pitch' && <PitchTab result={result} />}
+            </div>
+          </>
+        )}
+      </main>
+    </div>
   )
 }
