@@ -41,13 +41,33 @@ export default function TrendsPage() {
   }
 
   const pollStatus = (runId: string) => {
+    let notFoundCount = 0
     const interval = setInterval(async () => {
       try {
         const res = await fetch(`/api/trends/status?id=${runId}`)
-        const data = await res.json()
 
-        setLoadingPhase(data.phase)
-        setLoadingProgress(data.progress)
+        if (res.status === 404) {
+          notFoundCount++
+          if (notFoundCount >= 3) {
+            clearInterval(interval)
+            alert('Analysis session expired (server restarted). Please try again.')
+            setAppState('input')
+          }
+          return
+        }
+        notFoundCount = 0
+
+        if (!res.ok) {
+          clearInterval(interval)
+          const text = await res.text()
+          alert(`Error: ${text || res.statusText}`)
+          setAppState('input')
+          return
+        }
+
+        const data = await res.json()
+        if (data.phase) setLoadingPhase(data.phase)
+        if (data.progress != null) setLoadingProgress(data.progress)
 
         if (data.phase === 'complete' && data.result) {
           clearInterval(interval)

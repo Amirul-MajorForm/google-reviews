@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
 
       console.log(`[trends-apify] received ${items.length} items`)
       console.log('[trends-apify] first item keys:', Object.keys(items[0] as object))
-      console.log('[trends-apify] first item:', JSON.stringify(items[0]).substring(0, 400))
+      console.log('[trends-apify] first item (full):', JSON.stringify(items[0]).substring(0, 2000))
 
       const rawItems = items as Record<string, unknown>[]
 
