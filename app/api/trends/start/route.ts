@@ -91,19 +91,32 @@ export async function POST(req: NextRequest) {
           throw new Error(`No data returned for keyword "${kw}". Try a different term.`)
         }
 
-        // Output: { keyword, timeframe, geo, timeline_data: { "2023-W01": 75, ... }, data_granularity }
+        // Output: { keyword, timeframe, geo,
+        //   timeline_data: { "Ultherapy": { "2025-08-17": 56, ... }, "isPartial": { ... } }
+        // }
         const item = items[0] as Record<string, unknown>
-        const timelineData = item.timeline_data as Record<string, number> | undefined
+        const rawTimeline = item.timeline_data as Record<string, unknown> | undefined
 
-        if (!timelineData || typeof timelineData !== 'object') {
+        if (!rawTimeline || typeof rawTimeline !== 'object') {
           throw new Error(`Unexpected data format for "${kw}". timeline_data missing.`)
         }
 
-        const pts: TrendPoint[] = Object.entries(timelineData).map(([date, value]) => ({
-          date,
-          value: Number(value),
-          keyword: kw,
-        }))
+        // Find the keyword data key — everything except "isPartial"
+        const kwKey = Object.keys(rawTimeline).find(k => k !== 'isPartial')
+        if (!kwKey) {
+          throw new Error(`No keyword data found in timeline_data for "${kw}"`)
+        }
+
+        const kwData = rawTimeline[kwKey] as Record<string, number>
+        console.log(`[trends] "${kw}" kwKey="${kwKey}", ${Object.keys(kwData).length} dates`)
+
+        const pts: TrendPoint[] = Object.entries(kwData)
+          .filter(([, v]) => typeof v === 'number')
+          .map(([date, value]) => ({
+            date,
+            value: Number(value),
+            keyword: kw,
+          }))
         // Sort chronologically
         pts.sort((a, b) => a.date.localeCompare(b.date))
         allTimePoints.push(...pts)
