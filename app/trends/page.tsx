@@ -7,6 +7,7 @@ import TrendsInputForm from './components/TrendsInputForm'
 import TrendsDashboardHeader from './components/dashboard/Header'
 import TrendsTabBar from './components/dashboard/TabBar'
 import TrendsOverviewTab from './components/dashboard/tabs/OverviewTab'
+import TrendsRelatedTab from './components/dashboard/tabs/RelatedTab'
 import TrendsInsightsTab from './components/dashboard/tabs/InsightsTab'
 import { TrendsAnalysisResult } from '@/types/trends'
 import { RunPhase } from '@/types/analysis'
@@ -118,6 +119,7 @@ export default function TrendsPage() {
             <TrendsTabBar active={activeTab} onChange={setActiveTab} />
             <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 24px' }}>
               {activeTab === 'overview' && <TrendsOverviewTab result={result} />}
+              {activeTab === 'related' && <TrendsRelatedTab result={result} />}
               {activeTab === 'insights' && <TrendsInsightsTab result={result} />}
             </div>
           </>

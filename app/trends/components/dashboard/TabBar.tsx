@@ -1,5 +1,6 @@
 const TABS = [
   { key: 'overview', label: 'Overview' },
+  { key: 'related', label: 'Related Queries' },
   { key: 'insights', label: 'AI Insights' },
 ]
 

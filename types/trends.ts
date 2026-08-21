@@ -4,6 +4,23 @@ export interface TrendPoint {
   keyword: string
 }
 
+export interface RelatedQuery {
+  query: string
+  value: number
+  formattedValue: string
+  isRising: boolean
+  keyword: string
+}
+
+export interface RelatedTopic {
+  topic: string
+  topicTitle: string
+  value: number
+  formattedValue: string
+  isRising: boolean
+  keyword: string
+}
+
 export interface TrendInsight {
   summary: string
   peakPeriod: string
@@ -18,6 +35,8 @@ export interface TrendsAnalysisResult {
   location: string
   timePeriod: string
   interestOverTime: TrendPoint[]
+  relatedQueries: RelatedQuery[]
+  relatedTopics: RelatedTopic[]
   insights: TrendInsight
   analyzedAt: string
 }
