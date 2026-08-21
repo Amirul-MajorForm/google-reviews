@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
 interface SidebarProps {
-  activeTool: 'reviews' | 'search' | 'trends'
+  activeTool: 'reviews' | 'search'
   onNewAnalysis?: () => void
   showNew?: boolean
 }
@@ -30,18 +30,6 @@ const TOOLS = [
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="11" cy="11" r="8"/>
         <path d="m21 21-4.35-4.35"/>
-      </svg>
-    ),
-  },
-  {
-    key: 'trends',
-    label: 'Trends Scraper',
-    description: 'Google Trends data',
-    href: '/trends',
-    icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
-        <polyline points="16 7 22 7 22 13"/>
       </svg>
     ),
   },
