@@ -1,0 +1,37 @@
+export interface TrendPoint {
+  date: string
+  value: number
+  keyword: string
+}
+
+export interface TrendInsight {
+  summary: string
+  peakPeriod: string
+  trend: 'rising' | 'falling' | 'stable' | 'volatile'
+  keyObservations: string[]
+  opportunityAngles: string[]
+  contentIdeas: string[]
+}
+
+export interface TrendsAnalysisResult {
+  keywords: string[]
+  location: string
+  timePeriod: string
+  interestOverTime: TrendPoint[]
+  insights: TrendInsight
+  analyzedAt: string
+}
+
+export interface TrendsRunStatus {
+  phase: 'scraping' | 'analyzing' | 'complete' | 'error'
+  progress: number
+  error?: string
+}
+
+export interface TrendsRunState {
+  apifyRunId: string | null
+  keywords: string[]
+  location?: string
+  status: TrendsRunStatus
+  result?: TrendsAnalysisResult
+}
