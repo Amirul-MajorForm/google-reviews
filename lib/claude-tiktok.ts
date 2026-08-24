@@ -10,7 +10,7 @@ export async function analyzeTikTokVideos(
 ): Promise<TikTokInsight> {
   const topVideos = [...videos]
     .sort((a, b) => b.plays - a.plays)
-    .slice(0, 40)
+    .slice(0, 25)
 
   const videoSummaries = topVideos.map((v, i) => {
     const engRate = v.plays > 0 ? (((v.likes + v.comments + v.shares) / v.plays) * 100).toFixed(1) : '0'
@@ -68,8 +68,14 @@ Rules:
   const textBlock = data.content?.find((b: { type: string }) => b.type === 'text')
   if (!textBlock?.text) throw new Error('No text in Claude response')
 
-  const jsonMatch = textBlock.text.match(/\{[\s\S]*\}/)
-  if (!jsonMatch) throw new Error('Claude response had no JSON')
+  const raw: string = textBlock.text
+  // Strip optional markdown code fences, then extract first {...} block
+  const stripped = raw.replace(/^```(?:json)?\s*/m, '').replace(/\s*```\s*$/m, '')
+  const jsonMatch = stripped.match(/\{[\s\S]*\}/)
+  if (!jsonMatch) {
+    console.error('[claude-tiktok] No JSON in response, first 500 chars:', raw.substring(0, 500))
+    throw new Error('Claude response had no JSON')
+  }
   return JSON.parse(jsonMatch[0]) as TikTokInsight
 }
 
