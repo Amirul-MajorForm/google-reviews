@@ -94,19 +94,24 @@ export async function POST(req: NextRequest) {
           thumbnail: String((item.covers as Record<string, unknown>)?.['default'] ?? item.thumbnail ?? item.imageUrl ?? '') || undefined,
           hasGeoSignal: false,
         }
-      }).filter(v => {
+      })
+
+      const beforeFilters = videos.length
+      const filtered = videos.filter(v => {
+        // 1. Zero-engagement drop
         if (v.plays === 0 && v.likes === 0) return false
 
-        // Keep only English-language captions (allow short/empty captions through)
-        if (v.caption && v.caption.trim().length > 10) {
+        // 2. English-language check (allow short/empty captions through)
+        if (v.caption && v.caption.trim().length > 15) {
           const ascii = v.caption.replace(/[^a-zA-Z]/g, '').length
           const total = v.caption.replace(/\s/g, '').length
-          if (total > 10 && ascii / total < 0.35) return false
+          if (total > 15 && ascii / total < 0.25) return false
         }
 
-        // Relevance filter: caption or hashtags must contain the search keyword
-        // (catches hashtag-spam videos that tag unrelated keywords)
-        if (queryType !== 'profile') {
+        // 3. Relevance filter for keyword queries only.
+        //    Hashtag queries: Apify already filtered by hashtag — skip this check.
+        //    Profile queries: all videos from that creator are relevant.
+        if (queryType === 'keyword') {
           const kw = cleanQuery.toLowerCase()
           const captionLower = v.caption.toLowerCase()
           const inCaption = captionLower.includes(kw)
@@ -114,16 +119,15 @@ export async function POST(req: NextRequest) {
           if (!inCaption && !inHashtags) return false
         }
 
-        // Geography filter: for SG (and other specific markets), check for
-        // country signal in hashtags or caption. Videos with no country signal
-        // are kept (they may still be from SG creators); only actively non-SG-market
-        // signals are excluded via the relevance check above.
+        // 4. Geography filter: use full country names and explicit hashtags only —
+        //    bare 2-letter codes (us, au, my) match too many common English words
+        //    and cause false positives.
         const geoSignals: Record<string, string[]> = {
-          SG: ['singapore', 'sg', '#sg', '#singapore', 'singapura'],
-          AU: ['australia', 'au', '#australia', '#sydney', '#melbourne', '#brisbane'],
-          US: ['usa', 'us', 'america', '#usa', '#unitedstates', '#nyc', '#la'],
-          GB: ['uk', 'britain', 'england', '#uk', '#london', '#british'],
-          MY: ['malaysia', 'my', '#malaysia', '#kl', '#kualalumpur'],
+          SG: ['singapore', '#sg', '#singapore', 'singapura'],
+          AU: ['australia', '#australia', '#sydney', '#melbourne', '#brisbane', '#perth'],
+          US: ['united states', 'america', '#usa', '#unitedstates', '#nyc', '#losangeles', '#newyork'],
+          GB: ['britain', 'england', '#uk', '#london', '#british', 'united kingdom'],
+          MY: ['malaysia', '#malaysia', '#kl', '#kualalumpur', 'kuala lumpur'],
         }
         const countryTerms = geoSignals[proxyCountry]
         if (countryTerms) {
@@ -134,19 +138,19 @@ export async function POST(req: NextRequest) {
           const hasOtherMarket = otherMarkets.some(t => allText.includes(t))
           const hasThisMarket = countryTerms.some(t => allText.includes(t))
           if (hasThisMarket) v.hasGeoSignal = true
-          // Drop only if it clearly signals another market AND has no signal for ours
           if (hasOtherMarket && !hasThisMarket) return false
         }
 
         return true
       })
 
-      console.log(`[tiktok] mapped ${videos.length} valid videos`)
-      if (videos.length === 0) throw new Error('No valid video data extracted. The actor may have returned an unexpected format.')
+      console.log(`[tiktok] filter summary: ${beforeFilters} mapped → ${filtered.length} after filters`)
+
+      if (filtered.length === 0) throw new Error('No valid video data extracted. The actor may have returned an unexpected format.')
 
       const { analyzeTikTokVideos, buildTikTokResult } = await import('@/lib/claude-tiktok')
-      const insights = await analyzeTikTokVideos(query, queryType, videos, context || '')
-      const result = buildTikTokResult(query, queryType, videos, insights)
+      const insights = await analyzeTikTokVideos(query, queryType, filtered, context || '')
+      const result = buildTikTokResult(query, queryType, filtered, insights)
 
       s.status = { phase: 'complete', progress: 100 }
       s.result = result
