@@ -13,7 +13,10 @@ const SENTIMENT_COLOR = {
 }
 
 function ThemeDrillDown({ theme, result, onBack }: { theme: Theme; result: AnalysisResult; onBack: () => void }) {
-  const reviews = result.reviews.filter(r => r.themes.includes(theme.theme))
+  const themeLower = theme.theme.toLowerCase()
+  const reviews = result.reviews.filter(r =>
+    r.themes.some(t => t.toLowerCase() === themeLower || t.toLowerCase().includes(themeLower) || themeLower.includes(t.toLowerCase()))
+  )
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -168,7 +171,7 @@ export default function ThemesTab({ result }: { result: AnalysisResult }) {
                   {t.theme}
                 </div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                  {t.mentions} mentions · tap to view
+                  {t.mentions} mentions
                 </div>
               </div>
               <span style={{
