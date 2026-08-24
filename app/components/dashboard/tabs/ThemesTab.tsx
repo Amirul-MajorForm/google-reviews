@@ -76,7 +76,22 @@ function ThemeDrillDown({ theme, result, onBack }: { theme: Theme; result: Analy
               <tbody>
                 {reviews.map((r, i) => (
                   <tr key={i}>
-                    <td style={{ fontWeight: 500, whiteSpace: 'nowrap' }}>{r.author}</td>
+                    <td style={{ fontWeight: 500, whiteSpace: 'nowrap' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        {r.author}
+                        {r.url && (
+                          <a
+                            href={r.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="View on Google Maps"
+                            style={{ color: 'var(--accent)', fontSize: '0.75rem', lineHeight: 1, textDecoration: 'none', flexShrink: 0 }}
+                          >
+                            ↗
+                          </a>
+                        )}
+                      </div>
+                    </td>
                     <td>
                       <span style={{ color: 'var(--warning)', fontFamily: 'Space Grotesk', fontWeight: 700 }}>
                         {'★'.repeat(r.rating)}

@@ -8,6 +8,7 @@ interface RawReview {
   date: string
   text: string
   place?: string
+  url?: string
 }
 
 interface ClaudeInsights {
@@ -142,6 +143,7 @@ export function buildAnalysisResult(
     place: r.place,
     sentiment: insights.reviewSentiments?.[i] ?? 'neutral',
     themes: insights.reviewThemes?.[i] ?? [],
+    url: r.url,
   }))
 
   return {

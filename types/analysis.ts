@@ -4,6 +4,7 @@ export interface Review {
   date: string
   text: string
   place?: string
+  url?: string
   sentiment: 'positive' | 'neutral' | 'negative'
   themes: string[]
 }

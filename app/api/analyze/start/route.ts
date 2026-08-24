@@ -125,7 +125,19 @@ export async function POST(req: NextRequest) {
           ''
         ) || undefined
 
-        return { author, rating, date, text, place }
+        const rawUrl = String(
+          item.place_url ??
+          item.placeUrl ??
+          item.url ??
+          item.reviewUrl ??
+          item.google_maps_url ??
+          item.googleMapsUrl ??
+          item.link ??
+          ''
+        )
+        const url = rawUrl.startsWith('http') ? rawUrl : undefined
+
+        return { author, rating, date, text, place, url }
       }).filter(r => r.rating > 0 && r.text.trim().length > 10)
 
       console.log(`[apify] mapped ${rawReviews.length} valid reviews from ${items.length} raw items`)
