@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
 interface SidebarProps {
-  activeTool: 'reviews' | 'search'
+  activeTool: 'reviews' | 'search' | 'tiktok'
   onNewAnalysis?: () => void
   showNew?: boolean
 }
@@ -30,6 +30,17 @@ const TOOLS = [
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="11" cy="11" r="8"/>
         <path d="m21 21-4.35-4.35"/>
+      </svg>
+    ),
+  },
+  {
+    key: 'tiktok',
+    label: 'TikTok Analyser',
+    description: 'TikTok content intelligence',
+    href: '/tiktok',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/>
       </svg>
     ),
   },
