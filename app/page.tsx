@@ -8,6 +8,7 @@ import DashboardHeader from './components/dashboard/Header'
 import TabBar from './components/dashboard/TabBar'
 import OverviewTab from './components/dashboard/tabs/OverviewTab'
 import ThemesTab from './components/dashboard/tabs/ThemesTab'
+import ReviewsTab from './components/dashboard/tabs/ReviewsTab'
 import PitchTab from './components/dashboard/tabs/PitchTab'
 import PrintReport from './components/PrintReport'
 import { AnalysisResult, RunPhase } from '@/types/analysis'
@@ -97,6 +98,7 @@ export default function Home() {
             <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 24px' }}>
               {activeTab === 'overview' && <OverviewTab result={result} />}
               {activeTab === 'themes' && <ThemesTab result={result} />}
+              {activeTab === 'reviews' && <ReviewsTab result={result} />}
               {activeTab === 'pitch' && <PitchTab result={result} />}
             </div>
           </>
