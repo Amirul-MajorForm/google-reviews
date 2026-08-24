@@ -95,12 +95,48 @@ export async function POST(req: NextRequest) {
         }
       }).filter(v => {
         if (v.plays === 0 && v.likes === 0) return false
-        // Keep only English-language captions (allow empty captions through)
-        if (v.caption && v.caption.trim().length > 0) {
+
+        // Keep only English-language captions (allow short/empty captions through)
+        if (v.caption && v.caption.trim().length > 10) {
           const ascii = v.caption.replace(/[^a-zA-Z]/g, '').length
           const total = v.caption.replace(/\s/g, '').length
           if (total > 10 && ascii / total < 0.35) return false
         }
+
+        // Relevance filter: caption or hashtags must contain the search keyword
+        // (catches hashtag-spam videos that tag unrelated keywords)
+        if (queryType !== 'profile') {
+          const kw = cleanQuery.toLowerCase()
+          const captionLower = v.caption.toLowerCase()
+          const inCaption = captionLower.includes(kw)
+          const inHashtags = v.hashtags.some(h => h.toLowerCase().includes(kw))
+          if (!inCaption && !inHashtags) return false
+        }
+
+        // Geography filter: for SG (and other specific markets), check for
+        // country signal in hashtags or caption. Videos with no country signal
+        // are kept (they may still be from SG creators); only actively non-SG-market
+        // signals are excluded via the relevance check above.
+        const geoSignals: Record<string, string[]> = {
+          SG: ['singapore', 'sg', '#sg', '#singapore', 'singapura'],
+          AU: ['australia', 'au', '#australia', '#sydney', '#melbourne', '#brisbane'],
+          US: ['usa', 'us', 'america', '#usa', '#unitedstates', '#nyc', '#la'],
+          GB: ['uk', 'britain', 'england', '#uk', '#london', '#british'],
+          MY: ['malaysia', 'my', '#malaysia', '#kl', '#kualalumpur'],
+        }
+        const countryTerms = geoSignals[proxyCountry]
+        if (countryTerms) {
+          const allText = (v.caption + ' ' + v.hashtags.join(' ')).toLowerCase()
+          const otherMarkets = Object.entries(geoSignals)
+            .filter(([code]) => code !== proxyCountry)
+            .flatMap(([, terms]) => terms)
+          const hasOtherMarket = otherMarkets.some(t => allText.includes(t))
+          const hasThisMarket = countryTerms.some(t => allText.includes(t))
+          if (hasThisMarket) v.hasGeoSignal = true
+          // Drop only if it clearly signals another market AND has no signal for ours
+          if (hasOtherMarket && !hasThisMarket) return false
+        }
+
         return true
       })
 

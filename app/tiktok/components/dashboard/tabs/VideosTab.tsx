@@ -91,7 +91,18 @@ export default function TikTokVideosTab({ result }: { result: TikTokAnalysisResu
               {videos.map((v, i) => (
                 <tr key={v.id || i}>
                   <td style={{ fontWeight: 500, whiteSpace: 'nowrap', fontSize: '0.82rem' }}>
-                    @{v.authorUsername || v.author}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      @{v.authorUsername || v.author}
+                      {v.hasGeoSignal && (
+                        <span title="Contains local market signal (e.g. #singapore)" style={{
+                          fontSize: '0.65rem', fontFamily: 'Space Grotesk', fontWeight: 700,
+                          color: 'var(--positive)', background: 'var(--positive)18',
+                          padding: '1px 5px', borderRadius: 3,
+                        }}>
+                          LOCAL
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td style={{ maxWidth: 320, lineHeight: 1.5, fontSize: '0.85rem' }}>
                     {v.caption.substring(0, 120)}{v.caption.length > 120 ? '…' : ''}

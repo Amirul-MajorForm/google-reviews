@@ -14,6 +14,7 @@ export interface TikTokVideo {
   music: string
   createdAt: string
   thumbnail?: string
+  hasGeoSignal?: boolean
 }
 
 export interface TikTokInsight {
