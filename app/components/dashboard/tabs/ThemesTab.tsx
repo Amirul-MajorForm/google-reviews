@@ -102,7 +102,7 @@ function ThemeDrillDown({ theme, result, onBack }: { theme: Theme; result: Analy
                       {r.place || '—'}
                     </td>
                     <td style={{ color: 'var(--text-muted)', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{r.date}</td>
-                    <td style={{ maxWidth: 400, lineHeight: 1.5 }}>{r.text.substring(0, 200)}{r.text.length > 200 ? '…' : ''}</td>
+                    <td style={{ maxWidth: 400, lineHeight: 1.5 }} dangerouslySetInnerHTML={{ __html: r.text }} />
                     <td><SentimentPill value={r.sentiment} /></td>
                   </tr>
                 ))}
