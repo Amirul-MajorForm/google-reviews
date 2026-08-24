@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
           hashtags: hashtagArr.map(h => String(h.name ?? h.title ?? '')).filter(Boolean),
           music: String(musicMeta?.musicName ?? musicMeta?.title ?? item.music ?? ''),
           createdAt: String(item.createTimeISO ?? item.createTime ?? item.createdAt ?? '').substring(0, 10),
-          thumbnail: String(item.covers?.default ?? item.thumbnail ?? item.imageUrl ?? '') || undefined,
+          thumbnail: String((item.covers as Record<string, unknown>)?.['default'] ?? item.thumbnail ?? item.imageUrl ?? '') || undefined,
         }
       }).filter(v => v.plays > 0 || v.likes > 0)
 
