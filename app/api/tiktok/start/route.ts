@@ -16,11 +16,12 @@ function detectQueryType(query: string): 'hashtag' | 'profile' | 'keyword' {
 }
 
 export async function POST(req: NextRequest) {
-  const { query, context } = await req.json()
+  const { query, country, context } = await req.json()
   if (!query) return NextResponse.json({ error: 'Missing query' }, { status: 400 })
 
   const runId = uuidv4()
   const queryType = detectQueryType(query.trim())
+  const proxyCountry = (country || 'SG').toUpperCase()
 
   const state: TikTokRunState = {
     apifyRunId: null,
@@ -41,12 +42,14 @@ export async function POST(req: NextRequest) {
         actorInput = {
           profiles: [cleanQuery],
           resultsPerPage: 30,
+          proxyCountryCode: proxyCountry,
         }
       } else {
         // hashtag or keyword — use as hashtag search
         actorInput = {
           hashtags: [cleanQuery],
           resultsPerPage: 30,
+          proxyCountryCode: proxyCountry,
         }
       }
 
@@ -90,7 +93,16 @@ export async function POST(req: NextRequest) {
           createdAt: String(item.createTimeISO ?? item.createTime ?? item.createdAt ?? '').substring(0, 10),
           thumbnail: String((item.covers as Record<string, unknown>)?.['default'] ?? item.thumbnail ?? item.imageUrl ?? '') || undefined,
         }
-      }).filter(v => v.plays > 0 || v.likes > 0)
+      }).filter(v => {
+        if (v.plays === 0 && v.likes === 0) return false
+        // Keep only English-language captions (allow empty captions through)
+        if (v.caption && v.caption.trim().length > 0) {
+          const ascii = v.caption.replace(/[^a-zA-Z]/g, '').length
+          const total = v.caption.replace(/\s/g, '').length
+          if (total > 10 && ascii / total < 0.35) return false
+        }
+        return true
+      })
 
       console.log(`[tiktok] mapped ${videos.length} valid videos`)
       if (videos.length === 0) throw new Error('No valid video data extracted. The actor may have returned an unexpected format.')

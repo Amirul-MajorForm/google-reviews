@@ -2,12 +2,41 @@
 
 import { RunPhase } from '@/types/analysis'
 
-const PHASES = [
-  { key: 'scraping-start', label: 'Finding Google reviews…', phase: 'scraping' },
-  { key: 'scraping-fetch', label: 'Scraping review data…', phase: 'scraping' },
-  { key: 'analyzing', label: 'AI extracting insights…', phase: 'analyzing' },
-  { key: 'complete', label: 'Building dashboard…', phase: 'complete' },
-]
+type Tool = 'reviews' | 'search' | 'tiktok'
+
+const COPY: Record<Tool, {
+  scraping: { heading: string; sub: string; note: string }
+  analyzing: { heading: string; sub: string }
+  phases: string[]
+}> = {
+  reviews: {
+    scraping: {
+      heading: 'Scraping reviews…',
+      sub: 'Pulling real patient reviews from Google Maps',
+      note: 'The Apify actor is browsing Google Maps to collect real reviews. This usually takes 2–5 minutes depending on search volume.',
+    },
+    analyzing: { heading: 'Analysing with AI…', sub: 'Claude is extracting pitch-ready insights' },
+    phases: ['Finding Google listings…', 'Scraping review data…', 'AI extracting insights…', 'Building dashboard…'],
+  },
+  search: {
+    scraping: {
+      heading: 'Scraping search results…',
+      sub: 'Fetching Google search results pages',
+      note: 'The Apify actor is collecting SERP data. This usually takes 30–60 seconds.',
+    },
+    analyzing: { heading: 'Analysing with AI…', sub: 'Claude is extracting competitive insights' },
+    phases: ['Querying Google Search…', 'Scraping result pages…', 'AI extracting insights…', 'Building dashboard…'],
+  },
+  tiktok: {
+    scraping: {
+      heading: 'Scraping TikTok…',
+      sub: 'Fetching videos from TikTok',
+      note: 'The Apify actor is collecting TikTok video data. This usually takes 1–3 minutes depending on the hashtag volume.',
+    },
+    analyzing: { heading: 'Analysing with AI…', sub: 'Claude is identifying content patterns and opportunities' },
+    phases: ['Connecting to TikTok…', 'Fetching video data…', 'AI analysing content…', 'Building dashboard…'],
+  },
+}
 
 function getPhaseIndex(phase: RunPhase, progress: number): number {
   if (phase === 'scraping') return progress > 30 ? 1 : 0
@@ -15,8 +44,18 @@ function getPhaseIndex(phase: RunPhase, progress: number): number {
   return 3
 }
 
-export default function LoadingScreen({ phase, progress }: { phase: RunPhase; progress: number }) {
+export default function LoadingScreen({
+  phase,
+  progress,
+  tool = 'reviews',
+}: {
+  phase: RunPhase
+  progress: number
+  tool?: Tool
+}) {
   const currentIndex = getPhaseIndex(phase, progress)
+  const copy = COPY[tool]
+  const isAnalyzing = phase === 'analyzing'
 
   return (
     <div style={{
@@ -40,20 +79,20 @@ export default function LoadingScreen({ phase, progress }: { phase: RunPhase; pr
           }} />
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           <h2 style={{ fontFamily: 'Space Grotesk', fontWeight: 700, fontSize: '1.3rem', marginBottom: 8 }}>
-            {phase === 'analyzing' ? 'Analysing with AI…' : 'Scraping reviews…'}
+            {isAnalyzing ? copy.analyzing.heading : copy.scraping.heading}
           </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-            {phase === 'analyzing' ? 'Claude is extracting pitch-ready insights' : 'Pulling real patient reviews from Google'}
+            {isAnalyzing ? copy.analyzing.sub : copy.scraping.sub}
           </p>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {PHASES.map((p, i) => {
+          {copy.phases.map((label, i) => {
             const done = i < currentIndex
             const active = i === currentIndex
             const future = i > currentIndex
             return (
-              <div key={p.key} style={{ display: 'flex', alignItems: 'center', gap: 14, opacity: future ? 0.35 : 1 }}>
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, opacity: future ? 0.35 : 1 }}>
                 <div style={{
                   width: 20,
                   height: 20,
@@ -77,7 +116,7 @@ export default function LoadingScreen({ phase, progress }: { phase: RunPhase; pr
                   color: done ? 'var(--text-primary)' : active ? 'var(--accent)' : 'var(--text-muted)',
                   fontWeight: active ? 600 : 400,
                 }}>
-                  {p.label}
+                  {label}
                 </span>
               </div>
             )
@@ -95,7 +134,7 @@ export default function LoadingScreen({ phase, progress }: { phase: RunPhase; pr
             color: 'var(--text-muted)',
             lineHeight: 1.6,
           }}>
-            The Apify actor is browsing Google Maps to collect real patient reviews. This usually takes 2–5 minutes depending on the search volume.
+            {copy.scraping.note}
           </div>
         )}
 

@@ -22,7 +22,7 @@ export default function TikTokPage() {
   const [activeTab, setActiveTab] = useState('overview')
   const [submitting, setSubmitting] = useState(false)
 
-  const handleSubmit = async (data: { query: string; context: string }) => {
+  const handleSubmit = async (data: { query: string; country: string; context: string }) => {
     setSubmitting(true)
     try {
       const res = await fetch('/api/tiktok/start', {
@@ -110,7 +110,7 @@ export default function TikTokPage() {
         )}
 
         {appState === 'loading' && (
-          <LoadingScreen phase={loadingPhase} progress={loadingProgress} />
+          <LoadingScreen phase={loadingPhase} progress={loadingProgress} tool="tiktok" />
         )}
 
         {appState === 'dashboard' && result && (

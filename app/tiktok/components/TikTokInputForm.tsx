@@ -3,17 +3,33 @@
 import { useState } from 'react'
 
 interface Props {
-  onSubmit: (data: { query: string; context: string }) => void
+  onSubmit: (data: { query: string; country: string; context: string }) => void
   loading?: boolean
 }
 
+const COUNTRIES = [
+  { code: 'SG', label: 'Singapore' },
+  { code: 'AU', label: 'Australia' },
+  { code: 'US', label: 'United States' },
+  { code: 'GB', label: 'United Kingdom' },
+  { code: 'CA', label: 'Canada' },
+  { code: 'NZ', label: 'New Zealand' },
+  { code: 'MY', label: 'Malaysia' },
+  { code: 'ID', label: 'Indonesia' },
+  { code: 'TH', label: 'Thailand' },
+  { code: 'IN', label: 'India' },
+  { code: 'PH', label: 'Philippines' },
+  { code: 'AE', label: 'UAE' },
+]
+
 export default function TikTokInputForm({ onSubmit, loading }: Props) {
   const [query, setQuery] = useState('')
+  const [country, setCountry] = useState('SG')
   const [context, setContext] = useState('')
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit({ query: query.trim(), context: context.trim() })
+    onSubmit({ query: query.trim(), country, context: context.trim() })
   }
 
   return (
@@ -46,6 +62,22 @@ export default function TikTokInputForm({ onSubmit, loading }: Props) {
           />
           <p style={{ marginTop: 6, fontSize: '0.78rem', color: 'var(--text-muted)' }}>
             Use <strong>#hashtag</strong> for hashtag search · <strong>keyword</strong> for topic search · <strong>@username</strong> for a creator's videos
+          </p>
+        </div>
+
+        <div>
+          <label className="section-label" style={{ display: 'block', marginBottom: 8 }}>Country / region</label>
+          <select
+            value={country}
+            onChange={e => setCountry(e.target.value)}
+            style={{ width: '100%' }}
+          >
+            {COUNTRIES.map(c => (
+              <option key={c.code} value={c.code}>{c.label}</option>
+            ))}
+          </select>
+          <p style={{ marginTop: 6, fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+            Sets the proxy location so TikTok returns content relevant to that market.
           </p>
         </div>
 
