@@ -92,6 +92,7 @@ export async function POST(req: NextRequest) {
           music: String(musicMeta?.musicName ?? musicMeta?.title ?? item.music ?? ''),
           createdAt: String(item.createTimeISO ?? item.createTime ?? item.createdAt ?? '').substring(0, 10),
           thumbnail: String((item.covers as Record<string, unknown>)?.['default'] ?? item.thumbnail ?? item.imageUrl ?? '') || undefined,
+          hasGeoSignal: false,
         }
       }).filter(v => {
         if (v.plays === 0 && v.likes === 0) return false
