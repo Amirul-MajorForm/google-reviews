@@ -82,16 +82,17 @@ export async function POST(req: NextRequest) {
           url,
           shortCode,
           caption: String(item.caption ?? item.text ?? item.description ?? ''),
-          type: String(item.type ?? item.mediaType ?? 'image').toLowerCase().includes('video')
-            ? 'video'
-            : String(item.type ?? '').toLowerCase().includes('sidecar') || String(item.type ?? '').toLowerCase().includes('album')
-            ? 'sidecar'
-            : 'image',
+          type: ((): 'image' | 'video' | 'sidecar' => {
+            const t = String(item.type ?? item.mediaType ?? 'image').toLowerCase()
+            if (t.includes('video')) return 'video'
+            if (t.includes('sidecar') || t.includes('album')) return 'sidecar'
+            return 'image'
+          })(),
           ownerUsername: String(owner?.username ?? item.ownerUsername ?? item.username ?? 'unknown'),
           ownerFullName: String(owner?.fullName ?? owner?.full_name ?? item.ownerFullName ?? ''),
           ownerFollowers: Number(owner?.followersCount ?? owner?.followers_count ?? item.ownerFollowers ?? 0),
-          likes: Number(item.likesCount ?? item.likes_count ?? item.edge_media_preview_like?.count ?? 0),
-          comments: Number(item.commentsCount ?? item.comments_count ?? item.edge_media_to_comment?.count ?? 0),
+          likes: Number(item.likesCount ?? item.likes_count ?? (item.edge_media_preview_like as Record<string, unknown>)?.count ?? 0),
+          comments: Number(item.commentsCount ?? item.comments_count ?? (item.edge_media_to_comment as Record<string, unknown>)?.count ?? 0),
           views: Number(item.videoViewCount ?? item.video_view_count ?? item.videoPlayCount ?? 0),
           hashtags: rawHashtags,
           locationName: item.locationName
