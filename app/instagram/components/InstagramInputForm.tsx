@@ -22,7 +22,7 @@ const COUNTRIES = [
   { code: 'AE', label: 'UAE' },
 ]
 
-export default function TikTokInputForm({ onSubmit, loading }: Props) {
+export default function InstagramInputForm({ onSubmit, loading }: Props) {
   const [query, setQuery] = useState('')
   const [country, setCountry] = useState('SG')
   const [context, setContext] = useState('')
@@ -35,7 +35,7 @@ export default function TikTokInputForm({ onSubmit, loading }: Props) {
   return (
     <div style={{ maxWidth: 560, margin: '0 auto', padding: '60px 24px' }}>
       <div style={{ marginBottom: 40 }}>
-        <div className="section-label" style={{ marginBottom: 12 }}>TikTok Intelligence</div>
+        <div className="section-label" style={{ marginBottom: 12 }}>Instagram Intelligence</div>
         <h1 style={{
           fontFamily: 'Space Grotesk',
           fontSize: '2rem',
@@ -44,40 +44,36 @@ export default function TikTokInputForm({ onSubmit, loading }: Props) {
           lineHeight: 1.2,
           marginBottom: 12,
         }}>
-          Decode what's winning on TikTok
+          Decode what's winning on Instagram
         </h1>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6 }}>
-          Scrape TikTok videos by hashtag, keyword, or creator profile. Get AI analysis of top-performing content — hooks, themes, engagement patterns, and content gaps you can exploit.
+          Scrape Instagram posts by hashtag or keyword. Get AI analysis of top-performing content — caption styles, engagement patterns, content themes, and gaps you can exploit.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <div>
-          <label className="section-label" style={{ display: 'block', marginBottom: 8 }}>Hashtag, keyword, or @profile *</label>
+          <label className="section-label" style={{ display: 'block', marginBottom: 8 }}>Hashtag or keyword *</label>
           <input
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder="e.g. #ultherapy, hifu treatment, @clinicname"
+            placeholder="e.g. #ultherapy, hifu treatment, #skincare"
             required
           />
           <p style={{ marginTop: 6, fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-            Use <strong>#hashtag</strong> for hashtag search · <strong>keyword</strong> for topic search · <strong>@username</strong> for a creator's videos
+            Use <strong>#hashtag</strong> for hashtag search · <strong>keyword</strong> for topic search
           </p>
         </div>
 
         <div>
           <label className="section-label" style={{ display: 'block', marginBottom: 8 }}>Country / region</label>
-          <select
-            value={country}
-            onChange={e => setCountry(e.target.value)}
-            style={{ width: '100%' }}
-          >
+          <select value={country} onChange={e => setCountry(e.target.value)} style={{ width: '100%' }}>
             {COUNTRIES.map(c => (
               <option key={c.code} value={c.code}>{c.label}</option>
             ))}
           </select>
           <p style={{ marginTop: 6, fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-            Sets the proxy location so TikTok returns content relevant to that market.
+            Filters results to posts with signals matching this market.
           </p>
         </div>
 
@@ -86,7 +82,7 @@ export default function TikTokInputForm({ onSubmit, loading }: Props) {
           <textarea
             value={context}
             onChange={e => setContext(e.target.value)}
-            placeholder="e.g. I want to understand what content formats are driving the most engagement in the aesthetics space so I can create a content strategy for my clinic."
+            placeholder="e.g. I want to understand what caption styles and visual formats are driving engagement for aesthetics clinics in Singapore."
             rows={3}
             style={{ resize: 'vertical' }}
           />
@@ -112,7 +108,7 @@ export default function TikTokInputForm({ onSubmit, loading }: Props) {
             marginTop: 8,
           }}
         >
-          {loading ? 'Starting…' : 'Analyse TikToks →'}
+          {loading ? 'Starting…' : 'Analyse Instagram →'}
         </button>
 
         <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', textAlign: 'center' }}>

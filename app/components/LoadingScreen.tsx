@@ -2,7 +2,7 @@
 
 import { RunPhase } from '@/types/analysis'
 
-type Tool = 'reviews' | 'search' | 'tiktok'
+type Tool = 'reviews' | 'search' | 'tiktok' | 'instagram'
 
 const COPY: Record<Tool, {
   scraping: { heading: string; sub: string; note: string }
@@ -35,6 +35,15 @@ const COPY: Record<Tool, {
     },
     analyzing: { heading: 'Analysing with AI…', sub: 'Claude is identifying content patterns and opportunities' },
     phases: ['Connecting to TikTok…', 'Fetching video data…', 'AI analysing content…', 'Building dashboard…'],
+  },
+  instagram: {
+    scraping: {
+      heading: 'Scraping Instagram…',
+      sub: 'Fetching posts from Instagram',
+      note: 'The Apify actor is collecting Instagram post data. This usually takes 1–3 minutes depending on the hashtag volume.',
+    },
+    analyzing: { heading: 'Analysing with AI…', sub: 'Claude is identifying content patterns and opportunities' },
+    phases: ['Connecting to Instagram…', 'Fetching post data…', 'AI analysing content…', 'Building dashboard…'],
   },
 }
 
@@ -107,7 +116,7 @@ export default function LoadingScreen({
                 }}>
                   {done && (
                     <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
-                      <path d="M2 5.5L4.5 8L9 3" stroke="#0A0A0A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M2 5.5L4.5 8L9 3" stroke="#FFFFFF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   )}
                 </div>

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
 interface SidebarProps {
-  activeTool: 'reviews' | 'search' | 'tiktok'
+  activeTool: 'reviews' | 'search' | 'tiktok' | 'instagram'
   onNewAnalysis?: () => void
   showNew?: boolean
 }
@@ -41,6 +41,19 @@ const TOOLS = [
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/>
+      </svg>
+    ),
+  },
+  {
+    key: 'instagram',
+    label: 'Instagram Analyser',
+    description: 'Instagram content intelligence',
+    href: '/instagram',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="2" y="2" width="20" height="20" rx="5"/>
+        <circle cx="12" cy="12" r="4"/>
+        <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/>
       </svg>
     ),
   },
@@ -92,10 +105,10 @@ export default function Sidebar({ activeTool, onNewAnalysis, showNew }: SidebarP
             flexShrink: 0,
           }}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <rect x="2" y="2" width="5" height="5" rx="1" fill="#0A0A0A"/>
-              <rect x="9" y="2" width="5" height="5" rx="1" fill="#0A0A0A"/>
-              <rect x="2" y="9" width="5" height="5" rx="1" fill="#0A0A0A"/>
-              <rect x="9" y="9" width="5" height="5" rx="1" fill="#0A0A0A" opacity="0.4"/>
+              <rect x="2" y="2" width="5" height="5" rx="1" fill="#FFFFFF"/>
+              <rect x="9" y="2" width="5" height="5" rx="1" fill="#FFFFFF"/>
+              <rect x="2" y="9" width="5" height="5" rx="1" fill="#FFFFFF"/>
+              <rect x="9" y="9" width="5" height="5" rx="1" fill="#FFFFFF" opacity="0.4"/>
             </svg>
           </div>
           <div>
@@ -137,7 +150,7 @@ export default function Sidebar({ activeTool, onNewAnalysis, showNew }: SidebarP
                   borderRadius: 7,
                   marginBottom: 2,
                   background: isActive ? 'var(--accent)' : 'transparent',
-                  color: isActive ? '#0A0A0A' : 'var(--text-primary)',
+                  color: isActive ? '#FFFFFF' : 'var(--text-primary)',
                   cursor: 'pointer',
                   transition: 'background 0.15s',
                   textDecoration: 'none',
@@ -156,7 +169,7 @@ export default function Sidebar({ activeTool, onNewAnalysis, showNew }: SidebarP
                   <div style={{
                     fontSize: '0.7rem',
                     opacity: isActive ? 0.7 : 1,
-                    color: isActive ? '#0A0A0A' : 'var(--text-muted)',
+                    color: isActive ? 'rgba(255,255,255,0.75)' : 'var(--text-muted)',
                     lineHeight: 1.2,
                     marginTop: 1,
                   }}>

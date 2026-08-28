@@ -71,7 +71,7 @@ export default function TikTokOverviewTab({ result }: { result: TikTokAnalysisRe
                   background: i === 0 ? 'var(--accent)' : 'var(--border)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontFamily: 'Space Grotesk', fontWeight: 700, fontSize: '0.85rem',
-                  color: i === 0 ? '#0A0A0A' : 'var(--text-muted)',
+                  color: i === 0 ? '#FFFFFF' : 'var(--text-muted)',
                   flexShrink: 0,
                 }}>
                   {i + 1}
