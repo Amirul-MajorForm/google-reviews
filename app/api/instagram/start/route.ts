@@ -39,13 +39,13 @@ export async function POST(req: NextRequest) {
 
       if (queryType === 'profile') {
         actorInput = {
-          usernames: [cleanQuery],
+          directUrls: [`https://www.instagram.com/${cleanQuery}/`],
           resultsType: 'posts',
           resultsLimit: 50,
         }
       } else {
         actorInput = {
-          hashtags: [cleanQuery],
+          directUrls: [`https://www.instagram.com/explore/tags/${encodeURIComponent(cleanQuery)}/`],
           resultsType: 'posts',
           resultsLimit: 50,
         }
