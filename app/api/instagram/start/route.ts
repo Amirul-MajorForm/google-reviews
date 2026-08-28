@@ -40,17 +40,19 @@ export async function POST(req: NextRequest) {
       if (queryType === 'profile') {
         actorInput = {
           usernames: [cleanQuery],
+          resultsType: 'posts',
           resultsLimit: 50,
         }
       } else {
         actorInput = {
           hashtags: [cleanQuery],
+          resultsType: 'posts',
           resultsLimit: 50,
         }
       }
 
       console.log('[instagram] actor input:', JSON.stringify(actorInput))
-      const apifyRunId = await startApifyRun('apify~instagram-search-scraper', actorInput)
+      const apifyRunId = await startApifyRun('apify~instagram-scraper', actorInput)
       s.apifyRunId = apifyRunId
       s.status = { phase: 'scraping', progress: 15 }
 
