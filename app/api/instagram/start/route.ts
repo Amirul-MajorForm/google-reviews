@@ -35,6 +35,12 @@ export async function POST(req: NextRequest) {
   ;(async () => {
     const s = runs.get(runId)!
     try {
+      const proxyConfig = {
+        useApifyProxy: true,
+        apifyProxyGroups: ['RESIDENTIAL'],
+        apifyProxyCountry: proxyCountry,
+      }
+
       let actorInput: Record<string, unknown>
 
       if (queryType === 'profile') {
@@ -42,12 +48,14 @@ export async function POST(req: NextRequest) {
           directUrls: [`https://www.instagram.com/${cleanQuery}/`],
           resultsType: 'posts',
           resultsLimit: 50,
+          proxy: proxyConfig,
         }
       } else {
         actorInput = {
           directUrls: [`https://www.instagram.com/explore/tags/${encodeURIComponent(cleanQuery)}/`],
           resultsType: 'posts',
           resultsLimit: 50,
+          proxy: proxyConfig,
         }
       }
 
