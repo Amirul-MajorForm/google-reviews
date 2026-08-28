@@ -16,9 +16,16 @@ type SortKey = 'plays' | 'likes' | 'comments' | 'shares' | 'er'
 export default function TikTokVideosTab({ result }: { result: TikTokAnalysisResult }) {
   const [search, setSearch] = useState('')
   const [sortBy, setSortBy] = useState<SortKey>('plays')
+  const [localOnly, setLocalOnly] = useState(true)
+
+  const localCount = result.videos.filter(v => v.hasGeoSignal).length
 
   const videos = result.videos
-    .filter(v => !search || v.caption.toLowerCase().includes(search.toLowerCase()) || v.authorUsername.toLowerCase().includes(search.toLowerCase()))
+    .filter(v => {
+      if (localOnly && !v.hasGeoSignal) return false
+      if (search && !v.caption.toLowerCase().includes(search.toLowerCase()) && !v.authorUsername.toLowerCase().includes(search.toLowerCase())) return false
+      return true
+    })
     .map(v => ({
       ...v,
       er: v.plays > 0 ? (((v.likes + v.comments + v.shares) / v.plays) * 100) : 0,
@@ -56,6 +63,22 @@ export default function TikTokVideosTab({ result }: { result: TikTokAnalysisResu
             <SortBtn k="shares" label="Shares" />
             <SortBtn k="er" label="Eng. Rate" />
           </div>
+          <button
+            onClick={() => setLocalOnly(!localOnly)}
+            style={{
+              padding: '5px 12px',
+              borderRadius: 5,
+              border: '1px solid var(--border)',
+              background: localOnly ? 'var(--positive)18' : 'var(--surface-raised)',
+              color: localOnly ? 'var(--positive)' : 'var(--text-muted)',
+              fontFamily: 'Space Grotesk',
+              fontWeight: 600,
+              fontSize: '0.78rem',
+              cursor: 'pointer',
+            }}
+          >
+            LOCAL only {localOnly ? `(${localCount})` : ''}
+          </button>
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}

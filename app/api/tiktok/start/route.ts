@@ -41,14 +41,14 @@ export async function POST(req: NextRequest) {
       if (queryType === 'profile') {
         actorInput = {
           profiles: [cleanQuery],
-          resultsPerPage: 30,
+          resultsPerPage: 100,
           proxyCountryCode: proxyCountry,
         }
       } else {
         // hashtag or keyword — use as hashtag search
         actorInput = {
           hashtags: [cleanQuery],
-          resultsPerPage: 30,
+          resultsPerPage: 100,
           proxyCountryCode: proxyCountry,
         }
       }
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
       s.apifyRunId = apifyRunId
       s.status = { phase: 'scraping', progress: 15 }
 
-      const items = await pollApifyRun(apifyRunId, 180000)
+      const items = await pollApifyRun(apifyRunId, 300000)
       s.status = { phase: 'analyzing', progress: 60 }
 
       console.log(`[tiktok] received ${items.length} items`)
@@ -101,8 +101,13 @@ export async function POST(req: NextRequest) {
         // 1. Zero-engagement drop
         if (v.plays === 0 && v.likes === 0) return false
 
-        // 2. English-language check (allow short/empty captions through)
-        if (v.caption && v.caption.trim().length > 15) {
+        // 2. English-language check
+        if (v.caption && v.caption.trim().length > 5) {
+          // Immediately drop captions containing non-Latin scripts (Thai, Burmese, Arabic,
+          // Chinese, Japanese, Korean, Devanagari, etc.) regardless of hashtag content
+          const nonLatin = /[฀-๿က-႟؀-ۿ一-鿿぀-ヿ가-힯ऀ-ॿ]/
+          if (nonLatin.test(v.caption)) return false
+          // Fallback ASCII ratio for other non-English scripts
           const ascii = v.caption.replace(/[^a-zA-Z]/g, '').length
           const total = v.caption.replace(/\s/g, '').length
           if (total > 15 && ascii / total < 0.25) return false
