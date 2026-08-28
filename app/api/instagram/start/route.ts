@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
 
       if (items.length === 0) throw new Error('No Instagram posts returned. Try a different hashtag or username.')
 
-      const posts: InstagramPost[] = (items as Record<string, unknown>[]).map(item => {
+      const mapped: InstagramPost[] = (items as Record<string, unknown>[]).map(item => {
         const owner = item.owner as Record<string, unknown> | undefined
         const hashtagArr = (item.hashtags as string[] | { name?: string }[] | undefined) || []
 
@@ -104,17 +104,33 @@ export async function POST(req: NextRequest) {
           thumbnail: String(item.displayUrl ?? item.thumbnail ?? item.imageUrl ?? '') || undefined,
           hasGeoSignal: false,
         }
-      }).filter(p => {
-        if (p.likes === 0 && p.comments === 0) return false
+      })
 
-        // Non-Latin script detection
+      const geoSignals: Record<string, string[]> = {
+        SG: ['singapore', '#sg', '#singapore', 'singapura'],
+        AU: ['australia', '#australia', '#sydney', '#melbourne', '#brisbane', '#perth'],
+        US: ['united states', 'america', '#usa', '#unitedstates', '#nyc', '#losangeles', '#newyork'],
+        GB: ['britain', 'england', '#uk', '#london', '#british', 'united kingdom'],
+        MY: ['malaysia', '#malaysia', '#kl', '#kualalumpur', 'kuala lumpur'],
+      }
+
+      let afterEngagement = 0, afterScript = 0, afterRelevance = 0, afterGeo = 0
+      const posts = mapped.filter(p => {
+        if (p.likes === 0 && p.comments === 0) return false
+        afterEngagement++
+
+        // Non-Latin script: reject only if caption is predominantly non-Latin (ratio-based)
         if (p.caption && p.caption.trim().length > 5) {
-          const nonLatin = /[฀-๿က-႟؀-ۿ一-鿿぀-ヿ가-힯ऀ-ॿ]/
-          if (nonLatin.test(p.caption)) return false
-          const ascii = p.caption.replace(/[^a-zA-Z]/g, '').length
+          const nonLatinRe = /[฀-๿က-႟؀-ۿ一-鿿぀-ヿ가-힯ऀ-ॿ]/g
           const total = p.caption.replace(/\s/g, '').length
-          if (total > 15 && ascii / total < 0.25) return false
+          if (total > 15) {
+            const nonLatinCount = (p.caption.match(nonLatinRe) || []).length
+            if (nonLatinCount / total > 0.4) return false
+            const ascii = p.caption.replace(/[^a-zA-Z]/g, '').length
+            if (ascii / total < 0.2) return false
+          }
         }
+        afterScript++
 
         // Relevance filter for keyword queries only
         if (queryType === 'keyword') {
@@ -123,15 +139,9 @@ export async function POST(req: NextRequest) {
           const inHashtags = p.hashtags.some(h => h.toLowerCase().includes(kw))
           if (!inCaption && !inHashtags) return false
         }
+        afterRelevance++
 
         // Geo filter using full country names/explicit hashtags only
-        const geoSignals: Record<string, string[]> = {
-          SG: ['singapore', '#sg', '#singapore', 'singapura'],
-          AU: ['australia', '#australia', '#sydney', '#melbourne', '#brisbane', '#perth'],
-          US: ['united states', 'america', '#usa', '#unitedstates', '#nyc', '#losangeles', '#newyork'],
-          GB: ['britain', 'england', '#uk', '#london', '#british', 'united kingdom'],
-          MY: ['malaysia', '#malaysia', '#kl', '#kualalumpur', 'kuala lumpur'],
-        }
         const countryTerms = geoSignals[proxyCountry]
         if (countryTerms) {
           const allText = (p.caption + ' ' + p.hashtags.join(' ') + ' ' + (p.locationName ?? '')).toLowerCase()
@@ -143,11 +153,12 @@ export async function POST(req: NextRequest) {
           if (hasThisMarket) p.hasGeoSignal = true
           if (hasOtherMarket && !hasThisMarket) return false
         }
+        afterGeo++
 
         return true
       })
 
-      console.log(`[instagram] filter summary: ${items.length} received → ${posts.length} after filters`)
+      console.log(`[instagram] filter summary: ${items.length} received → mapped ${mapped.length} → engagement ${afterEngagement} → script ${afterScript} → relevance ${afterRelevance} → geo ${afterGeo} = ${posts.length} final`)
       if (posts.length === 0) throw new Error('No valid posts extracted. The actor may have returned an unexpected format.')
 
       const { analyzeInstagramPosts, buildInstagramResult } = await import('@/lib/claude-instagram')
